@@ -2417,6 +2417,63 @@ SIFoldOperandsImpl::isOMod(const MachineInstr &MI) const {
 
     return {RegOp, OMod};
   }
+  case AMDGPU::V_CVT_PK_BF16_F32_e64: {
+    // Fold cvt_pk_bf16_f32(fma_mix_f32_bf16(x, 1.0, x)) -> x with MUL2 omod
+    if (MFI->getMode().FP32Denormals.Output != DenormalMode::PreserveSign ||
+        MI.mayRaiseFPException())
+      return {nullptr, SIOutMods::NONE};
+
+    if (TII->hasModifiersSet(MI, AMDGPU::OpName::omod) ||
+        TII->hasModifiersSet(MI, AMDGPU::OpName::clamp))
+      return {nullptr, SIOutMods::NONE};
+
+    const MachineOperand *Src0 = TII->getNamedOperand(MI, AMDGPU::OpName::src0);
+    if (!Src0->isReg())
+      return {nullptr, SIOutMods::NONE};
+
+    MachineInstr *FmaDef = MRI->getVRegDef(Src0->getReg());
+    if (!FmaDef || FmaDef->getOpcode() != AMDGPU::V_FMA_MIX_F32_BF16)
+      return {nullptr, SIOutMods::NONE};
+
+    if (!MRI->hasOneNonDBGUse(Src0->getReg()))
+      return {nullptr, SIOutMods::NONE};
+
+    const MachineOperand *FmaSrc0 =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src0);
+    const MachineOperand *FmaSrc1 =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src1);
+    const MachineOperand *FmaSrc2 =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src2);
+
+    if (!FmaSrc0 || !FmaSrc1 || !FmaSrc2)
+      return {nullptr, SIOutMods::NONE};
+
+    // FmaSrc1 == 1.0?
+    if (!FmaSrc1->isImm() || FmaSrc1->getImm() != 0x3f80)
+      return {nullptr, SIOutMods::NONE};
+
+    if (!FmaSrc0->isReg() || !FmaSrc2->isReg() ||
+        FmaSrc0->getReg() != FmaSrc2->getReg())
+      return {nullptr, SIOutMods::NONE};
+
+    const MachineOperand *Src0Mods =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src0_modifiers);
+    const MachineOperand *Src1Mods =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src1_modifiers);
+    const MachineOperand *Src2Mods =
+        TII->getNamedOperand(*FmaDef, AMDGPU::OpName::src2_modifiers);
+    if ((Src0Mods &&
+         (Src0Mods->getImm() & (SISrcMods::NEG | SISrcMods::ABS))) ||
+        (Src1Mods &&
+         (Src1Mods->getImm() & (SISrcMods::NEG | SISrcMods::ABS))) ||
+        (Src2Mods &&
+         (Src2Mods->getImm() & (SISrcMods::NEG | SISrcMods::ABS))) ||
+        TII->hasModifiersSet(*FmaDef, AMDGPU::OpName::omod) ||
+        TII->hasModifiersSet(*FmaDef, AMDGPU::OpName::clamp))
+      return {nullptr, SIOutMods::NONE};
+
+    return {FmaSrc0, SIOutMods::MUL2};
+  }
   default:
     return std::pair(nullptr, SIOutMods::NONE);
   }

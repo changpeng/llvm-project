@@ -12,11 +12,8 @@ define amdgpu_ps void @v_cos_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-FAKE16-NEXT:    global_wb
 ; SDAG-FAKE16-NEXT:    v_nop
 ; SDAG-FAKE16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-FAKE16-NEXT:    v_cos_bf16_e32 v0, v0
+; SDAG-FAKE16-NEXT:    v_cos_bf16_e64 v0, v0 mul:2
 ; SDAG-FAKE16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-FAKE16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-FAKE16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-FAKE16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-FAKE16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-FAKE16-NEXT:    s_endpgm
 ;
@@ -25,11 +22,8 @@ define amdgpu_ps void @v_cos_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-REAL16-NEXT:    global_wb
 ; SDAG-REAL16-NEXT:    v_nop
 ; SDAG-REAL16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-REAL16-NEXT:    v_cos_bf16_e32 v0.l, v0.l
+; SDAG-REAL16-NEXT:    v_cos_bf16_e64 v0.l, v0.l mul:2
 ; SDAG-REAL16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-REAL16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-REAL16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-REAL16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-REAL16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-REAL16-NEXT:    s_endpgm
   %cos = call bfloat @llvm.amdgcn.cos.bf16(bfloat %in)
@@ -96,11 +90,8 @@ define amdgpu_ps void @v_rcp_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-FAKE16-NEXT:    global_wb
 ; SDAG-FAKE16-NEXT:    v_nop
 ; SDAG-FAKE16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-FAKE16-NEXT:    v_rcp_bf16_e32 v0, v0
+; SDAG-FAKE16-NEXT:    v_rcp_bf16_e64 v0, v0 mul:2
 ; SDAG-FAKE16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-FAKE16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-FAKE16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-FAKE16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-FAKE16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-FAKE16-NEXT:    s_endpgm
 ;
@@ -109,11 +100,8 @@ define amdgpu_ps void @v_rcp_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-REAL16-NEXT:    global_wb
 ; SDAG-REAL16-NEXT:    v_nop
 ; SDAG-REAL16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-REAL16-NEXT:    v_rcp_bf16_e32 v0.l, v0.l
+; SDAG-REAL16-NEXT:    v_rcp_bf16_e64 v0.l, v0.l mul:2
 ; SDAG-REAL16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-REAL16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-REAL16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-REAL16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-REAL16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-REAL16-NEXT:    s_endpgm
   %rcp = call bfloat @llvm.amdgcn.rcp.bf16(bfloat %in)
@@ -180,11 +168,8 @@ define amdgpu_ps void @v_sqrt_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-FAKE16-NEXT:    global_wb
 ; SDAG-FAKE16-NEXT:    v_nop
 ; SDAG-FAKE16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-FAKE16-NEXT:    v_sqrt_bf16_e32 v0, v0
+; SDAG-FAKE16-NEXT:    v_sqrt_bf16_e64 v0, v0 mul:2
 ; SDAG-FAKE16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-FAKE16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-FAKE16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-FAKE16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-FAKE16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-FAKE16-NEXT:    s_endpgm
 ;
@@ -193,11 +178,8 @@ define amdgpu_ps void @v_sqrt_bf16_mul2(bfloat %in, ptr addrspace(1) %out) #0 {
 ; SDAG-REAL16-NEXT:    global_wb
 ; SDAG-REAL16-NEXT:    v_nop
 ; SDAG-REAL16-NEXT:    s_setreg_imm32_b32 hwreg(HW_REG_WAVE_MODE, 25, 1), 1 ; msbs: dst=0 src0=0 src1=0 src2=0
-; SDAG-REAL16-NEXT:    v_sqrt_bf16_e32 v0.l, v0.l
+; SDAG-REAL16-NEXT:    v_sqrt_bf16_e64 v0.l, v0.l mul:2
 ; SDAG-REAL16-NEXT:    v_dual_mov_b32 v3, v2 :: v_dual_mov_b32 v2, v1
-; SDAG-REAL16-NEXT:    s_delay_alu instid0(TRANS32_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_1)
-; SDAG-REAL16-NEXT:    v_fma_mix_f32_bf16 v0, v0, 1.0, v0 op_sel:[0,1,0] op_sel_hi:[1,1,1]
-; SDAG-REAL16-NEXT:    v_cvt_pk_bf16_f32 v0, v0, s0
 ; SDAG-REAL16-NEXT:    global_store_b16 v[2:3], v0, off
 ; SDAG-REAL16-NEXT:    s_endpgm
   %sqrt = call bfloat @llvm.amdgcn.sqrt.bf16(bfloat %in)
